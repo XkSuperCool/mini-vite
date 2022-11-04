@@ -1,5 +1,6 @@
 import connect from 'connect'
 import { blue, green } from 'picocolors'
+import { optimizer } from '../node/optimizer'
 
 export async function startDevServer() {
   const app = connect()
@@ -7,6 +8,7 @@ export async function startDevServer() {
   const startTime = Date.now()
 
   app.listen(3000, async () => {
+		await optimizer(root)
 
     console.log(
       green('🚀 No-Bundle server restart done!'),
