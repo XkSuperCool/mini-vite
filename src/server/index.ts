@@ -5,6 +5,8 @@ import { createPluginContainer } from '../node/pluginContainer'
 import type { PluginContainer } from '../node/pluginContainer'
 import type { Plugin } from '../node/plugin'
 import { resolvePlugins } from '../node/plugins'
+import { indexHtmlMiddleare } from './middlewares/indexHtml'
+import { transformMiddleware } from './middlewares/transform'
 
 export interface ServerContext {
   root: string
@@ -32,6 +34,9 @@ export async function startDevServer() {
       await plugin.configureServer(serverContext)
     }
   }
+
+  app.use(indexHtmlMiddleare(serverContext))
+    .use(transformMiddleware(serverContext))
 
   app.listen(3000, async () => {
     await optimizer(root)

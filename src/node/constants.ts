@@ -24,4 +24,6 @@ export const EXTERNAL_TYPES = [
 
 export const BARE_IMPORT_RE = /^[\w@][^:]/
 
-export const PRE_BUNDLE_DIR = path.resolve("node_modules", ".m-vite")
+export const PRE_BUNDLE_DIR = path.join("node_modules", ".m-vite")
+
+export const DEFAULT_EXTERSIONS = [".tsx", ".ts", ".jsx", "js"];

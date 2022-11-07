@@ -32,7 +32,7 @@
     "connect": "^3.7.0",
     "debug": "^4.3.4",
     "es-module-lexer": "^1.1.0",
-    "esbuild": "^0.15.13",
+    "esbuild": "0.14.38",
     "fs-extra": "^10.1.0",
     "magic-string": "^0.26.7",
     "picocolors": "^1.0.0",

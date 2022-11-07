@@ -62,7 +62,7 @@ export function createPluginContainer(plugins: Plugin[]): PluginContainer {
 			const ctx = new Context()
 			for (const plugin of plugins) {
 				if (plugin.transform) {
-					const result = await plugin.transform.call(ctx, code, id)
+					const result = await plugin.transform.call(ctx as any, code, id)
 					if (result) {
 						code = typeof result === 'string' ? result : result.code
 					}

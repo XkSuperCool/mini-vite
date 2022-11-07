@@ -1,5 +1,5 @@
-import { LoadResult, PartialResolvedId, SourceDescription } from 'rollup'
-import { ServerContext } from '../server'
+import type { PluginContext, LoadResult, PartialResolvedId, SourceDescription } from 'rollup'
+import type { ServerContext } from '../server'
 
 export type ServerHook = (
   server: ServerContext
@@ -14,6 +14,7 @@ export interface Plugin {
   ) => Promise<PartialResolvedId | null> | PartialResolvedId | null
   load?: (id: string) => Promise<LoadResult | null> | LoadResult | null
   transform?: (
+    this: PluginContext,
     code: string,
     id: string
   ) => Promise<SourceDescription | null> | SourceDescription | null
