@@ -1,6 +1,6 @@
 import type { NextHandleFunction } from 'connect'
 import type { ServerContext } from '../index'
-import { cleanUrl, isJsRequest } from './utils'
+import { cleanUrl, isJsRequest, isCSSRequest } from './utils'
 
 export async function transformRequest(url: string, ctx: ServerContext) {
 	const pluginContainer = ctx.pluginContainer
@@ -26,7 +26,7 @@ export function transformMiddleware(ctx: ServerContext): NextHandleFunction {
       return next()
     }
 
-    if (isJsRequest(req.url)) {
+    if (isJsRequest(req.url) || isCSSRequest(req.url)) {
       const url = req.url
       const result = await transformRequest(url, ctx)
       if (!result) {

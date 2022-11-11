@@ -11,6 +11,10 @@ export function isJsRequest(id: string) {
   return false
 }
 
+export function isCSSRequest(id: string) {
+	return cleanUrl(id).endsWith('css')
+}
+
 export function cleanUrl(url: string) {
   return url.replace(HASH_RE, '').replace(QUERY_RE, '')
 }
