@@ -1,23 +1,23 @@
 import type { NextHandleFunction } from 'connect'
 import type { ServerContext } from '../index'
-import { cleanUrl, isJsRequest, isCSSRequest } from './utils'
+import { cleanUrl, isJsRequest, isCSSRequest, isImportRequest } from './utils'
 
 export async function transformRequest(url: string, ctx: ServerContext) {
-	const pluginContainer = ctx.pluginContainer
-	url = cleanUrl(url)
-	const resolveResult = await pluginContainer.resolveId(url)
-	let transformResult;
-	if (resolveResult?.id) {
-		let code = await pluginContainer.load(resolveResult.id)
-		if (typeof code === 'object' && code !== null) {
-			code = code.code
-		}
-		if (code) {
-			transformResult = await pluginContainer.transform(code, resolveResult.id)
-		}
-	}
+  const pluginContainer = ctx.pluginContainer
+  url = cleanUrl(url)
+  const resolveResult = await pluginContainer.resolveId(url)
+  let transformResult
+  if (resolveResult?.id) {
+    let code = await pluginContainer.load(resolveResult.id)
+    if (typeof code === 'object' && code !== null) {
+      code = code.code
+    }
+    if (code) {
+      transformResult = await pluginContainer.transform(code, resolveResult.id)
+    }
+  }
 
-	return transformResult
+  return transformResult
 }
 
 export function transformMiddleware(ctx: ServerContext): NextHandleFunction {
@@ -25,17 +25,22 @@ export function transformMiddleware(ctx: ServerContext): NextHandleFunction {
     if (req.method !== 'GET' || !req.url) {
       return next()
     }
-
-    if (isJsRequest(req.url) || isCSSRequest(req.url)) {
+ 
+    if (
+      isJsRequest(req.url) ||
+      isCSSRequest(req.url) ||
+      isImportRequest(req.url)
+    ) {
       const url = req.url
       const result = await transformRequest(url, ctx)
       if (!result) {
         return next()
       }
-			
+
       res.statusCode = 200
       res.setHeader('Content-Type', 'application/javascript')
       res.end(result.code)
+      return
     }
 
     next()

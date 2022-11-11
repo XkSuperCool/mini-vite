@@ -35,6 +35,12 @@ export function importAnalysis(): Plugin {
         const { s: modStart, e: modEnd, n: modSource } = importInfo
         if (!modSource) continue
 
+        if (modSource.endsWith('.jpeg')) {
+          const resolvedUrl = path.join(path.dirname(id), modSource)
+          ms.overwrite(modStart, modEnd, `${resolvedUrl}?import`)
+          continue
+        }
+
         // 第三方库: 路径重写到预构建产物路径
         if (BARE_IMPORT_RE.test(modSource)) {
           const bundlePath = path.join(

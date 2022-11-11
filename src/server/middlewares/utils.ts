@@ -15,6 +15,10 @@ export function isCSSRequest(id: string) {
 	return cleanUrl(id).endsWith('css')
 }
 
+export function isImportRequest(id: string) {
+	return id.endsWith('?import')
+}
+
 export function cleanUrl(url: string) {
   return url.replace(HASH_RE, '').replace(QUERY_RE, '')
 }

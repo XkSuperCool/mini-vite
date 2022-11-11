@@ -7,6 +7,7 @@ import type { Plugin } from '../node/plugin'
 import { resolvePlugins } from '../node/plugins'
 import { indexHtmlMiddleare } from './middlewares/indexHtml'
 import { transformMiddleware } from './middlewares/transform'
+import { staticMiddleware } from './middlewares/static'
 
 export interface ServerContext {
   root: string
@@ -35,8 +36,11 @@ export async function startDevServer() {
     }
   }
 
-  app.use(indexHtmlMiddleare(serverContext))
+  app
+    .use(indexHtmlMiddleare(serverContext))
     .use(transformMiddleware(serverContext))
+
+  app.use(staticMiddleware())
 
   app.listen(3000, async () => {
     await optimizer(root)
