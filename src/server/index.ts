@@ -8,12 +8,14 @@ import { resolvePlugins } from '../node/plugins'
 import { indexHtmlMiddleare } from './middlewares/indexHtml'
 import { transformMiddleware } from './middlewares/transform'
 import { staticMiddleware } from './middlewares/static'
+import { ModuleGraph } from '../node/ModuleGraph'
 
 export interface ServerContext {
   root: string
   pluginContainer: PluginContainer
   app: connect.Server
   plugins: Plugin[]
+  moduleGraph: ModuleGraph
 }
 
 export async function startDevServer() {
@@ -22,12 +24,14 @@ export async function startDevServer() {
   const startTime = Date.now()
   const plugins: Plugin[] = resolvePlugins()
   const pluginContainer = createPluginContainer(plugins)
+  const moduleGraph = new ModuleGraph((url) => pluginContainer.resolveId(url))
 
   const serverContext: ServerContext = {
     app,
     plugins,
     pluginContainer,
-    root: process.cwd()
+    root: process.cwd(),
+    moduleGraph
   }
 
   for (const plugin of plugins) {
@@ -42,13 +46,13 @@ export async function startDevServer() {
 
   app.use(staticMiddleware())
 
-  app.listen(3000, async () => {
+  app.listen(3001, async () => {
     await optimizer(root)
 
     console.log(
       green('🚀 No-Bundle server restart done!'),
       `${Date.now() - startTime}ms`
     )
-    console.log(`> local path: ${blue('http://localhost:3000')}`)
+    console.log(`> local path: ${blue('http://localhost:3001')}`)
   })
 }

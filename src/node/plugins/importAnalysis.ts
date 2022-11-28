@@ -29,6 +29,9 @@ export function importAnalysis(): Plugin {
       await init
       const [imports] = parse(code)
       const ms = new MagicString(code)
+      const { moduleGraph } = serverContext
+      const mod = moduleGraph.getModuleById(id)!
+      const importedModules = new Set<string>()
       for (const importInfo of imports) {
         // import React from 'react'
         // s = 18, e = 25, n = 'react'
@@ -48,6 +51,7 @@ export function importAnalysis(): Plugin {
             PRE_BUNDLE_DIR,
             `${modSource}.js`
           )
+          importedModules.add(bundlePath)
 
 					// 'react' -> '${root}/node_module/.m-vite/react.js'
 					// 将第三方的导入指向预构建的内容
@@ -56,10 +60,12 @@ export function importAnalysis(): Plugin {
 					const resolved = await this.resolve(modSource, id)
 					if (resolved) {
 						ms.overwrite(modStart, modEnd, resolved.id)
+            importedModules.add(resolved.id)
 					}
 				}
       }
-
+      // 记录模块信息，形成模块树
+      moduleGraph.updateModuleInfo(mod, importedModules)
 			return {
 				code: ms.toString(),
 				map: ms.generateMap()

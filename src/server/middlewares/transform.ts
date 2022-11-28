@@ -5,6 +5,13 @@ import { cleanUrl, isJsRequest, isCSSRequest, isImportRequest } from './utils'
 export async function transformRequest(url: string, ctx: ServerContext) {
   const pluginContainer = ctx.pluginContainer
   url = cleanUrl(url)
+  let mod = await ctx.moduleGraph.getModuleByUrl(url)
+
+  // 缓存模块编译后的产物，在热更新时会使用到
+  if (mod && mod.transformResult) {
+    return mod.transformResult
+  }
+
   const resolveResult = await pluginContainer.resolveId(url)
   let transformResult
   if (resolveResult?.id) {
@@ -12,9 +19,16 @@ export async function transformRequest(url: string, ctx: ServerContext) {
     if (typeof code === 'object' && code !== null) {
       code = code.code
     }
+
+    await ctx.moduleGraph.ensureEntryFromUrl(url)
+
     if (code) {
       transformResult = await pluginContainer.transform(code, resolveResult.id)
     }
+  }
+  
+  if (mod) {
+    mod.transformResult = transformResult
   }
 
   return transformResult
