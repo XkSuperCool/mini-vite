@@ -72,13 +72,14 @@ export class ModuleGraph {
     }
   }
 
-  // HMR 触发时会执行这个方法
+  // HMR 触发时会执行这个方法, 清楚模块缓存
   invalidateModule(file: string) {
     const mod = this.idToModuleMap.get(file)
     if (mod) {
       // 更新时间戳
       mod.lastHMRTimestamp = Date.now()
-      mod.transformResult = null
+      mod.transformResult = null // 缓存结果清除
+      // 引用该模块的父模块同样清除缓存
       mod.importers.forEach(importer => {
         this.invalidateModule(importer.id!)
       })
