@@ -1,6 +1,6 @@
 import type { ServerContext } from '../server/index'
 import { blue, green } from 'picocolors'
-import { MessageTypeEnum, UpdateTypeEnum } from '../esums/wss'
+import { MessageTypeEnum, UpdateTypeEnum } from '../enums/wss'
 import { getShortName } from './utils'
 
 export function bindingHMREvents(serverContext: ServerContext) {

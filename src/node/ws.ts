@@ -1,7 +1,7 @@
 import connect from 'connect'
 import { red } from 'picocolors'
 import { WebSocketServer, WebSocket } from 'ws'
-import { MessageTypeEnum } from '../esums/wss'
+import { MessageTypeEnum } from '../enums/wss'
 
 export function createWebSocketServer(server: connect.Server): {
 	send: (msg: Record<string, any>) => void,
