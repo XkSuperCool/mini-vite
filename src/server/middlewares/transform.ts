@@ -27,7 +27,7 @@ export async function transformRequest(url: string, ctx: ServerContext) {
     }
   }
   
-  if (mod) {
+  if (mod && transformResult) {
     mod.transformResult = transformResult
   }
 

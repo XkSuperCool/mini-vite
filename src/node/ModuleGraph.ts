@@ -1,4 +1,4 @@
-import { PartialResolvedId, TransformResult } from 'rollup'
+import { PartialResolvedId, SourceDescription } from 'rollup'
 import { cleanUrl } from '../server/middlewares/utils'
 
 export class ModuleNode {
@@ -8,7 +8,7 @@ export class ModuleNode {
   importers = new Set<ModuleNode>()
   // 模块所依赖的模块
   importedModules = new Set<ModuleNode>()
-  transformResult: TransformResult | null = null
+  transformResult: SourceDescription | null = null
   lastHMRTimestamp = 0
 
   constructor(url: string) {
