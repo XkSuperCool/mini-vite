@@ -3,7 +3,7 @@ import resolve from 'resolve'
 import MagicString from 'magic-string'
 import { pathExists } from 'fs-extra'
 import { init, parse } from 'es-module-lexer'
-import { cleanUrl, isJsRequest } from '../../server/middlewares/utils'
+import { cleanUrl, isJsRequest, normalizePath } from '../../server/middlewares/utils'
 import {
   BARE_IMPORT_RE,
   DEFAULT_EXTERSIONS,
@@ -11,6 +11,8 @@ import {
 } from '../constants'
 import type { Plugin } from '../plugin'
 import type { ServerContext } from '../../server/index'
+import { getShortName } from '../utils'
+import { CLIENT_PUBLIC_PATH } from './clientInject'
 
 export function importAnalysis(): Plugin {
   let serverContext: ServerContext
@@ -29,6 +31,20 @@ export function importAnalysis(): Plugin {
       await init
       const [imports] = parse(code)
       const ms = new MagicString(code)
+
+      const resolve = async (id: string, importer?: string) => {
+        const resolved = await this.resolve(id, importer && normalizePath(importer))
+        if (!resolved) return
+
+        const cleanedId = cleanUrl(resolved.id)
+        const mod = moduleGraph.getModuleById(cleanedId)
+        let resolvedId = `/${getShortName(resolved.id, serverContext.root)}`
+        if (mod && mod.lastHMRTimestamp > 0) {
+          resolvedId += '?t=' + mod.lastHMRTimestamp
+        }
+        return resolvedId
+      }
+
       const { moduleGraph } = serverContext
       const mod = moduleGraph.getModuleById(id)!
       const importedModules = new Set<string>()
@@ -57,13 +73,21 @@ export function importAnalysis(): Plugin {
 					// 将第三方的导入指向预构建的内容
 					ms.overwrite(modStart, modEnd, bundlePath)
         } else if (modSource.startsWith('.') || modSource.startsWith('/')) {
-					const resolved = await this.resolve(modSource, id)
+					const resolved = await resolve(modSource, id)
 					if (resolved) {
-						ms.overwrite(modStart, modEnd, resolved.id)
-            importedModules.add(resolved.id)
+						ms.overwrite(modStart, modEnd, resolved)
+            importedModules.add(resolved)
 					}
 				}
       }
+
+      if (!id.includes('node_modules') && id !== CLIENT_PUBLIC_PATH) {
+        ms.prepend(
+          `import { createHotContext as __vite__createHotContext } from "${CLIENT_PUBLIC_PATH}";` +
+          `import.meta.hot = __vite__createHotContext(${JSON.stringify(cleanUrl(mod.url))});`
+        )
+      }
+
       // 记录模块信息，形成模块树
       moduleGraph.updateModuleInfo(mod, importedModules)
 			return {
